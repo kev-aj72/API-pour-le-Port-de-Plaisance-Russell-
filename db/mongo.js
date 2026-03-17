@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 
 const clientOptions ={
-    userNewUrlPrser    : true,
-    dbName             : 'apinode'
+    dbName             : 'RussellDatabase'
 };
 
 exports.initClientDbConnection = async () => {
