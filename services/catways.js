@@ -68,7 +68,7 @@ exports.updateById = async(req, res, next) => {
             return res.status(201).json(catway);
         }
        return res.status(404).json('catway non trouvé') 
-    } catch (error) {console.log(error);
+    } catch (error) {
         return res.status(501).json(error);
     }
 };
