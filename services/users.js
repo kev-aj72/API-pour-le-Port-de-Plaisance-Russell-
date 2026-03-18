@@ -3,7 +3,7 @@ const User = require ('../models/user');
 // Get/users/
 exports.getAll = async (req, res, next) => {
     try{
-        const users = await User.find();
+        let users = await User.find();
         return res.status(200).json(users);
     } catch(error) {
         return res.status (501).json(error);
@@ -16,7 +16,7 @@ exports.getByEmail = async (req, res, next) => {
    const email = req.params.email;
 
     try{
-        const user = await User.findOne({email});
+        let user = await User.findOne({email});
         if (user) {
             return res.status(200).json(user);
         }
