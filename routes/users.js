@@ -3,10 +3,11 @@ const router = express.Router();
 
 const service = require('../services/users');
 
-router.get('/', service.getAll);
-router.get('/:email', service.getByEmail);
-router.post('/',service.create);
-router.put('/:email', service.updateByEmail);
-router.delete('/:email', service.deleteByEmail);
+
+router.get('/users', service.getAllUsers);
+router.get('/users/:email', service.getUserByEmail);
+router.post('/users', service.createUser);
+router.put('/users/:email', service.updateUserByEmail);
+router.delete('/users/:email', service.deleteUserByEmail);
 
 module.exports = router;

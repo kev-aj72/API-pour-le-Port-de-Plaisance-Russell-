@@ -1,18 +1,18 @@
 const User = require ('../models/user');
 
-// Get/users/
-exports.getAll = async (req, res, next) => {
+// GET tous les utilisateurs
+exports.getAllUsers = async (req, res, next) => {
     try{
         let users = await User.find();
         return res.status(200).json(users);
     } catch(error) {
-        return res.status (501).json(error);
+       return res.status(500).json({ message: "Erreur serveur" });
     }
 };
 
-// GET/users/:email
+// GET un utilisateur par email
 
-exports.getByEmail = async (req, res, next) => {
+exports.getUserByEmail = async (req, res, next) => {
    const email = req.params.email;
 
     try{
@@ -22,13 +22,13 @@ exports.getByEmail = async (req, res, next) => {
         }
         return res.status(404).json('Utilisateur non trouvé');
     } catch (error) {
-        return res. status(501).json(error);
+       return res.status(500).json({ message: "Erreur serveur" });
     }
 };
 
-// POST//users/
+// POST créer un nouvel utilisateur
 
-exports.create = async (req, res, next) => {
+exports.createUser = async (req, res, next) => {
     const temp = ({
         email    : req.body.email,
         name     : req.body.name,
@@ -41,14 +41,13 @@ exports.create = async (req, res, next) => {
 
         return res.status(201).json(user);
     } catch (error) {
-        console.log(error);
-        return res.status(501).json(error)
+        return res.status(500).json({ message: "Erreur serveur" });
     }
 };
 
-// PUT/users/:email
+// PUT modifier un utilisateur par email
 
-exports.updateByEmail = async(req, res, next) => {
+exports.updateUserByEmail = async(req, res, next) => {
     const email = req.params.email;
     const temp  = ({
         email    : req.body.email,
@@ -72,20 +71,20 @@ exports.updateByEmail = async(req, res, next) => {
         }
        return res.status(404).json('Utilisateur non trouvé') 
     } catch (error) {
-        return res.status(501).json(error);
+        return res.status(500).json({ message: "Erreur serveur" });
     }
 };
 
-// DELETE/users/:email
+// DELETE un utilisateur par email
 
-exports.deleteByEmail = async (req, res, next) => {
+exports.deleteUserByEmail = async (req, res, next) => {
     const email = req.params.email
 
     try {
         await User.deleteOne ({email: email});
         return res.status(204).json('delete_ok');
     } catch (error) {
-        return res.status(501).json(error);
+       return res.status(500).json({ message: "Erreur serveur" });
     }
 };
 

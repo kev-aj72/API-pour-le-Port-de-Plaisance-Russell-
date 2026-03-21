@@ -1,104 +1,134 @@
 const Reservations = require ('../models/reservations');
-
+const mongoose = require('mongoose');
 
 // GET/catways/:id/reservations 
-exports.getReservationByCatway = async (req, res, next) => {
-    const catwayId =req.params.id;
+exports.getReservationsByCatway = async (req, res, next) => {
+    try {
+        const catwayNumber = parseInt(req.params.id, 10);
 
-    try{
-        const reservations = await Reservations.find({catwayNumber:catwayId});
-        if(!reservations || reservations.length === 0) {
-            return res.status(404).json({ message: "Aucune réservation trouvée pour ce catway" });
+        if (isNaN(catwayNumber)) {
+            return res.status(400).json({message: "ID non valide"});
+        }
+
+        const reservations = await Reservations.find({ catwayNumber: catwayNumber });
+
+        if (!reservations || reservations.length === 0) {
+            return res.status(404).json({
+                message: "Aucune réservation trouvée pour ce catway"
+            });
         }
         return res.status(200).json(reservations);
-
-    } catch(error) {
-        return res.status (501).json(error);
+    } catch (error) {
+        return res.status(500).json({message: "Erreur serveur"});
     }
 };
 
-// GET /catway/:id/reservations/:idReservation
+// GET/catways/:id/reservations/:id
+
 
 exports.getReservationById = async (req, res, next) => {
-   const catwayid      = req.params.id;
-   const reservationid = req.params.id;
+    try {
+        const catwayNumber = parseInt(req.params.id, 10);
+        const reservationId = req.params.idReservation;
 
-    try{
-        let reservation = await Reservations.findOne({_id: reservationid, catwayNumber: catwayid });
-        if (!reservation) {
-            return res.status(404).json('Réservation introuvable pour ce catway');
+        if (isNaN(catwayNumber)) {
+            return res.status(400).json({ message: "ID du catway invalide" });
         }
+
+        if (mongoose.Types.ObjectId.isValid(reservationId)) {
+            return res.status(400).json({ message: "ID de la réservation invalide" });
+        }
+
+        const idReservation = new mongoose.Types.ObjectId(reservationId);
+
+        const reservation = await Reservations.findOne({_id: idReservation,catwayNumber});
+
+        if (!reservation) {
+            return res.status(404).json({ message: "Réservation non trouvée" });
+        }
+
         return res.status(200).json(reservation);
-        
+
     } catch (error) {
-        return res. status(501).json(error);
+        return res.status(500).json({ message: "Erreur serveur" });
     }
 };
 
-// POST/catways/:id/reservations 
+//POST /catways/:id/reservations
 
 exports.createReservation = async (req, res, next) => {
-    const catwayId = req.params.id;
-    const temp = ({
-        catwayNumber  : catwayId,
-        clientName    : req.body.clientName,
-        boatName      : req.body.boatName,
-        startDate     : req.body.startDate,
-        endDate       : req.body.endDate
-    });
-
     try {
-        let reservation = await Reservations.create(temp);
+        const catwayNumber = parseInt(req.params.id, 10);
+        const temp = {
+            clientName: req.body.clientName,
+            boatName: req.body.boatName,
+            startDate: req.body.startDate,
+            endDate: req.body.endDate
+        };
 
-        return res.status(201).json(reservation);
-    } catch (error) {
-        return res.status(501).json(error)
-    }
-};
-
-// PUT/catways/:id/reservations 
-
-exports.updateReservation = async(req, res, next) => {
-    const catwayId        = req.params.id;
-    const reservationId   = req.params.idReservation;
-    
-    const temp  = ({
-        catwayNumber  : catwayId,
-        clientName    : req.body.clientName,
-        boatName      : req.body.boatName,
-        startDate     : req.body.startDate,
-        endDate       : req.body.endDate
-    });
-
-    try {
-        const reservation = await Reservations.findOneAndUpdate({_id : reservationId, catawayNumber:catwayId});
-
-          if (reservation) {
-            Object.keys(temp).forEach((key) => {
-                if (!!temp[key]) {
-                    reservation[key] = temp[key];
-                }
-            });
-
-            await reservation.save();
-            return res.status(201).json(reservation);
+        if (isNaN(catwayNumber)) {
+            return res.status(400).json({ message: "ID du catway invalide" });
         }
-       return res.status(404).json('Réservation introuvable pour ce catway') 
+        if (![temp.clientName, temp.boatName, temp.startDate, temp.endDate].every(Boolean)) {
+            return res.status(400).json({ message: "Tous les champs sont requis" });
+        }           
+        const newReservation = new Reservations({ catwayNumber, ...temp });
+
+        const save = await newReservation.save();
+        return res.status(201).json(save);
     } catch (error) {
-        return res.status(501).json(error);
+        return res.status(500).json({ message: "Erreur serveur" });
     }
 };
 
-// DELETE/catway/:id/reservations/:idReservation 
+//PUT /catways/:id/reservations 
+exports.updateReservation = async (req, res) => {
+    try {
+        const catwayNumber = parseInt(req.params.id, 10);
+        const ReservationId = req.params.idReservation;
+        const data = req.body;
+
+        if (isNaN(catwayNumber)) {
+            return res.status(400).json({ message: "ID du catway invalide" });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(ReservationId)) {
+            return res.status(400).json({ message: "ID de la réservation invalide" });
+        }
+
+        const idReservation = new mongoose.Types.ObjectId(ReservationId);
+        const updated = await Reservations.findOneAndUpdate({ _id: idReservation, catwayNumber },data,{ new: true })
+
+        if (!updated) {
+            return res.status(404).json({ message: "Réservation non trouvée" });
+        }
+
+        return res.status(200).json(updated);
+
+    } catch (error) {
+        return res.status(500).json({ message: "Erreur serveur" });
+    }
+};
+
+//DELETE /catway/:id/reservations/:idReservation 
 
 exports.deleteReservation = async (req, res, next) => {
-    const catwayId        = req.params.id;
-    const reservationId   = req.params.id;
-
     try {
-        await Reservations.findOneAndDelete ({_id: reservationId, catwayNumber: catwayId});
-        return res.status(204).json('delete_ok');
+        const catwayNumber = parseInt(req.params.id, 10);
+        const ReservationId = req.params.idReservation;
+
+        if (isNaN(catwayNumber)) {
+            return res.status(400).json({ message: "ID du catway invalide" });
+        }
+
+        const deleted = await Reservations.findOneAndDelete({_id: ReservationId, catwayNumber});
+
+        if (!deleted) {
+            return res.status(404).json({ message: "Réservation non trouvée" });
+        }
+
+        return res.status(200).json({ message: "Réservation supprimée avec succès" });
     } catch (error) {
-        return res.status(501).json(error);
+        return res.status(500).json({ message: "Erreur serveur" });
     }
 };

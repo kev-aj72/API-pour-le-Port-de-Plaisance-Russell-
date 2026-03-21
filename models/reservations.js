@@ -5,14 +5,13 @@ const Reservation = new Schema({
     catwayNumber: {
         type : Number,
         trim : true,
-        required : true,
-        unique : true
+        required : true
     },
     
     clientName: {
         type : String,
         trim : true,
-        required : true,
+        required : true
     },
     
     boatName: {
