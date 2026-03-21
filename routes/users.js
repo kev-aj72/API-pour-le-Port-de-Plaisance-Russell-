@@ -10,4 +10,6 @@ router.post('/users', service.createUser);
 router.put('/users/:email', service.updateUserByEmail);
 router.delete('/users/:email', service.deleteUserByEmail);
 
+router.post('/users/authenticate', service.authenticate);
+
 module.exports = router;
