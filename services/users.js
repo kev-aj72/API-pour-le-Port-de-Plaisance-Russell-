@@ -4,27 +4,41 @@ const jwt    = require ('jsonwebtoken');
 
 // POST connexion user /login 
 
-exports.login = async (req, res, next) => {
+exports.login = async (req, res) => {
     try {
-        const user = await exports.authenticate(req.body.email, req.body.password);
-    
-        req.session.userId = user_id;
-        res.redirect('/dashboard');
+        const { email, password } = req.body;
 
-       } catch (error) {
-        return res.status(401).render('index',{ message: 'Identifiants incorrects' });
-    }   
-};
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email et mot de passe requis' });
+        }
 
-// GET deconexion User/logout
+        const user = await authenticate(email, password);
 
-exports.logout = async (req, res, next) => {
-    try {
-        return res.status(200).json({message: 'Déconnexion réussie'});
-    } catch (err) {
-        return res.status(500).json({ message: 'Erreur serveur' });
+        if (!user) {
+            return res.status(401).json({ error: 'Email ou mot de passe invalide' });
+        }
+
+        // Générer le token JWT
+        const token = jwt.sign(
+            { userId: user._id },
+            process.env.SECRET_KEY,
+            { expiresIn: 24 * 60 * 60 } // 24h
+        );
+
+        return res.status(200).json({
+            message: 'Authentification réussie',
+            token: token
+        });
+
+    } catch (error) {
+        console.error('Erreur login:', error);
+        return res.status(500).json({ error: 'Erreur serveur' });
     }
 };
+// GET deconexion User/logout
+
+
+
 // GET tous les utilisateurs
 exports.getAllUsers = async (req, res, next) => {
     try{
@@ -115,42 +129,15 @@ exports.deleteUserByEmail = async (req, res, next) => {
 
 // code pour l'authenticate
 
-exports.authenticate = async (req, res, next) => {
-    const { email, password } = req.body;
+const authenticate = async (email, password) => {
+    const user = await User.findOne({ email: email });
 
-    try {
-        let user = await User.findOne({ email: email }, '-__v -createdAt -updatedAt');
+    if (!user) return null; // Utilisateur non trouvé
 
-        if (user) {
-            bcrypt.compare(password, user.password, async (err, response) => {
-                if (err) {
-                    console.error(err); 
-                    return res.status(500).json({ message: "Erreur serveur" });
-                }
+    const isValid = await bcrypt.compare(password, user.password); // Comparaison sécurisée
+    if (!isValid) return null; // Mot de passe incorrect
 
-                if (response) {
-                    delete user._doc.password;
-
-                    const expireIn = 24 * 60 * 60;  
-                    const token = jwt.sign(
-                        { userId: user._id },   
-                        process.env.SECRET_KEY,  
-                        { expiresIn: expireIn }  
-                    );
-
-                  
-                    return res.status(200).json({
-                        message: "Authentification réussie",
-                        token: token  // Renvoyer le token dans la réponse
-                    });
-                }
-
-                return res.status(403).json({ message: 'Identifiants incorrects' });
-            });
-        } else {
-            return res.status(404).json({ message: 'Utilisateur non trouvé' });
-        }
-    } catch (error) { 
-        return res.status(500).json({ message: "Erreur serveur" });
-    }
+    delete user._doc.password; // Supprimer le mot de passe avant de renvoyer l'objet
+    return user;
 };
+exports.authenticate = authenticate;
