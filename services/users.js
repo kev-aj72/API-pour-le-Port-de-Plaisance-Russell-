@@ -2,6 +2,30 @@ const User   = require ('../models/user');
 const bcrypt = require ('bcrypt');
 const jwt    = require ('jsonwebtoken');
 
+// POST connexion user /login 
+
+exports.login = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+        console.log(req.body);
+
+        
+        await exports.authenticate(req, res, next);
+
+    } catch (error) {
+        return res.status(500).json({ message: 'Erreur serveur' });
+    }
+};
+
+// GET deconexion User/logout
+
+exports.logout = async (req, res, next) => {
+    try {
+        return res.status(200).json({message: 'Déconnexion réussie'});
+    } catch (err) {
+        return res.status(500).json({ message: 'Erreur serveur' });
+    }
+};
 // GET tous les utilisateurs
 exports.getAllUsers = async (req, res, next) => {
     try{
