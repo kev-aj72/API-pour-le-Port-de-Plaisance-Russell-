@@ -9,7 +9,7 @@
 
     <body>
             <h1>Port de Plaisance Russell</h1>
-            <form id="loginForm" action="/login" method="post">
+            <form id="loginForm" action="/login" method="POST">
                 <input type="email" name="email" placeholder="Email" required>
                 <input type="password" name="password" placeholder="Mot de passe" required>
                 <button type="submit">Se Connecter</button>
@@ -24,6 +24,35 @@
                 <input type="password" name="password" placeholder="Mot de passe" required>
                 <button type="submit">S'inscrire</button>
             </form>
+            <script>
+                document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const form = e.target;
+                    const email= form.email.value;
+                    const password = form.password.value;
+                    try {
+                        const response = await fetch ('/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type' : 'application/json'},
+                            body: JSON.stringify({ email, password})
+                        });
+                       const data = await response.json();
+
+                if (response.ok && data.token) {
+                    // Stocker le token dans le localStorage
+                    localStorage.setItem('token', data.token);
+                    // Rediriger vers la page dashboard
+                    window.location.href = '/dashboard';
+                        } else {
+                            const message = await response.text();
+                            alert('Erreur: '+ message); 
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        alert('Erreur serveur');
+                    }
+                });
+            </script>
            <script>
                 const signUp = document.getElementById('buttonSignUp');
                 const signUpForm  = document.getElementById('formSignUp');

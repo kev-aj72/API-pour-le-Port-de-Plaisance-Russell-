@@ -7,6 +7,7 @@ const cors         = require('cors')
 const catwaysRoutes = require ('./routes/catways');
 const usersRoutes   = require ('./routes/users');
 const reservationsRoutes = require ('./routes/reservations');
+const navRoutes = require('./routes/nav');
 const mongodb      = require('./db/mongo');
 
 mongodb.initClientDbConnection();
@@ -34,6 +35,7 @@ app.use(express.static('public'));
 app.use('/', usersRoutes);
 app.use('/', catwaysRoutes);
 app.use('/', reservationsRoutes);
+app.use('/', navRoutes);
 app.use(function(req, res, next) {
     res.status(404).json({name: 'API', version: '1.0', status: 404, message: 'not_found'});
 });
