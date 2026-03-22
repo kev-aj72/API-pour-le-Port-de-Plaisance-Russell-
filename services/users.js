@@ -6,15 +6,14 @@ const jwt    = require ('jsonwebtoken');
 
 exports.login = async (req, res, next) => {
     try {
-        const { email, password } = req.body;
-        console.log(req.body);
+        const user = await exports.authenticate(req.body.email, req.body.password);
+    
+        req.session.userId = user_id;
+        res.redirect('/dashboard');
 
-        
-        await exports.authenticate(req, res, next);
-
-    } catch (error) {
-        return res.status(500).json({ message: 'Erreur serveur' });
-    }
+       } catch (error) {
+        return res.status(401).render('index',{ message: 'Identifiants incorrects' });
+    }   
 };
 
 // GET deconexion User/logout
