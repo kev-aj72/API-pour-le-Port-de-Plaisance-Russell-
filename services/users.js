@@ -93,41 +93,41 @@ exports.deleteUserByEmail = async (req, res, next) => {
 // code pour l'authenticate
 
 exports.authenticate = async (req, res, next) => {
-
     const { email, password } = req.body;
 
     try {
-        let user = await User.findOne ({ email: email}, '-__v -createAt -updateAt');
+        let user = await User.findOne({ email: email }, '-__v -createdAt -updatedAt');
 
         if (user) {
-             bcrypt.compare(password, user.password, async (err, response) => {    
+            bcrypt.compare(password, user.password, async (err, response) => {
                 if (err) {
                     console.error(err); 
                     return res.status(500).json({ message: "Erreur serveur" });
                 }
+
                 if (response) {
                     delete user._doc.password;
 
-                    const expireIn = 24 * 60 * 60;
-                    const token    = jwt.sign(
-                        { userId: user._id },
-                        process.env.SECRET_KEY, 
-                        {expiresIn: expireIn}
-            );
+                    const expireIn = 24 * 60 * 60;  
+                    const token = jwt.sign(
+                        { userId: user._id },   
+                        process.env.SECRET_KEY,  
+                        { expiresIn: expireIn }  
+                    );
 
-            res.header('Authorization', 'Bearer ' + token);
+                  
+                    return res.status(200).json({
+                        message: "Authentification réussie",
+                        token: token  // Renvoyer le token dans la réponse
+                    });
+                }
 
-            return res.status(200).json('authentication reussie');
+                return res.status(403).json({ message: 'Identifiants incorrects' });
+            });
+        } else {
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
         }
-
-        return res.status (403).json('identifiants incorrects');
-        });
-    } else {
-         console.log('Utilisateur non trouvé pour l\'email:', email);
-        return res.status(404).json('utilisateur non trouvé');
+    } catch (error) { 
+        return res.status(500).json({ message: "Erreur serveur" });
     }
-
-    } catch (error) {
-        console.error(error); // Affiche l'erreur pour déboguer
-         return res.status(500).json({ message: "Erreur serveur" });
-    }}
+};
