@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API pour le Port de Plaisance Russell  </title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+
+    <body>
+            <h1>Port de Plaisance Russell</h1>
+            <form id="loginForm" action="/login" method="post">
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Mot de passe" required>
+                <button type="submit">Se Connecter</button>
+            </form>
+
+            <button id="buttonSignUp" type="button">Créer un compte</button>
+
+            <form id="formSignUp" class="hidden" action="/createUser" method="post">
+                <input type="text" name="Name" placeholder="Nom" required>
+                <input type="text" name="firstName" placeholder="Prénom" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Mot de passe" required>
+                <button type="submit">S'inscrire</button>
+            </form>
+           <script>
+                const signUp = document.getElementById('buttonSignUp');
+                const signUpForm  = document.getElementById('formSignUp');
+                
+                signUp.addEventListener('click', () => {
+                    signUpForm.classList.toggle('hidden');
+                });
+            </script>
+        
+    </body>
+</html>

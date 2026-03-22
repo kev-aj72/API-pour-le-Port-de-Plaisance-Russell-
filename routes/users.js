@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-
 const service = require('../services/users');
 const private = require('../middlewares/private');
 
